@@ -42,7 +42,6 @@ def add(desc, amount, type):
     
     """
     typecolor = "green" if type == "expense" else "red"
-    click.echo(f"Adding transaction: {desc} for {amount}")
     with open(data, "a") as f:
         writer = csv.writer(f)
         writer.writerow([f"{len(data.read_text().splitlines())}", f"{datetime.datetime.now().strftime('%Y-%m-%d')}", desc, amount, type])
