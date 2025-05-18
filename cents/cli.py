@@ -41,7 +41,7 @@ def add(desc, amount, type):
             cents add "Salary" 2000 -t income
     
     """
-    typecolor = "green" if type == "expense" else "red"
+    typecolor = "red" if type == "expense" else "green"
     trans_id = len(data.read_text().splitlines()) - 1
     with open(data, "a", newline='') as f:
         writer = csv.writer(f)
