@@ -42,7 +42,8 @@ def add(desc, amount, type):
     
     """
     typecolor = "green" if type == "expense" else "red"
-    with open(data, "a") as f:
+    trans_id = len(data.read_text().splitlines()) - 1
+    with open(data, "a", newline='') as f:
         writer = csv.writer(f)
-        writer.writerow([f"{len(data.read_text().splitlines())}", f"{datetime.datetime.now().strftime('%Y-%m-%d')}", desc, amount, type])
-    click.echo(f"Transaction added: {desc} for " + click.style(f"{amount}", fg=typecolor))
+        writer.writerow([str(trans_id), f"{datetime.now().strftime('%Y-%m-%d')}", desc.capitalize(), amount, type])
+    click.echo(f"Transaction added: '{desc.capitalize()}' for " + click.style(f"{amount}", fg=typecolor))
