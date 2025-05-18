@@ -1,6 +1,7 @@
 import click
 import csv
 from pathlib import Path
+from datetime import datetime
 
 data = Path.home() / "cents.csv" # Path to the CSV file
 
@@ -26,7 +27,8 @@ def cli(ctx):
 @cli.command()
 @click.argument("desc")
 @click.argument("amount")
-def add(desc, amount):
+@click.option("-t", "--type", type=click.Choice(["expense", "income"], case_sensitive=False), default="expense", help="Type of transaction: expense or income")
+def add(desc, amount, type):
     """
         Add a new transaction.
 
@@ -34,8 +36,14 @@ def add(desc, amount):
             desc: Description of the transaction
             amount: Amount of the transaction   
 
-        Example:
+        Examples:
             cents add "Groceries" 100
+            cents add "Salary" 2000 -t income
     
     """
+    typecolor = "green" if type == "expense" else "red"
     click.echo(f"Adding transaction: {desc} for {amount}")
+    with open(data, "a") as f:
+        writer = csv.writer(f)
+        writer.writerow([f"{len(data.read_text().splitlines())}", f"{datetime.datetime.now().strftime('%Y-%m-%d')}", desc, amount, type])
+    click.echo(f"Transaction added: {desc} for " + click.style(f"{amount}", fg=typecolor))
