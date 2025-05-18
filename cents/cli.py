@@ -3,7 +3,7 @@ import csv
 from pathlib import Path
 from datetime import datetime
 
-data = Path.home() / "cents.csv" # Path to the CSV file
+data = Path.home() / ".cents.csv" # Path to the CSV file
 
 def not_found():
     """
