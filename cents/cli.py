@@ -49,15 +49,15 @@ def add(desc, amount, type):
         writer.writerow([str(trans_id), f"{datetime.now().strftime('%Y-%m-%d')}", desc.capitalize(), amount, type])
     click.echo(f"Transaction added: '{desc.capitalize()}' for " + click.style(f"{amount}", fg=typecolor))
     
-@cli.command()
+@cli.command(name="list")
 @click.option("-t", "--type", type=click.Choice(["expense", "income"], case_sensitive=False), help="Filter output by type: expense or income")
-@click.option("-v","--verbose", is_flag=True, help="Show detailed output")
-def list(type, verbose):
+@click.option("-v", "--verbose", is_flag=True, help="Show detailed output")
+def list_transactions(type, verbose):
     """
         List all transactions.
 
         Args:
-            type: Filter output by type: expense or income
+            type: Filter transactions by type (expense or income)
             verbose: Show detailed output
 
         Examples:
@@ -68,13 +68,17 @@ def list(type, verbose):
     if not data.exists():
         not_found()
         return
+
     with open(data, "r") as f:
         reader = csv.reader(f)
-        transactions = list(reader)[1:]
+        transactions = list(reader)[1:] # Skip the header row
         if verbose:
             filtered_transactions = filter(lambda x: x[4] == type, transactions) if type else transactions
             headers = ["Id", "Date", "Description", "Amount", "Type"]
         else:
             filtered_transactions = filter(lambda x: x[4] == type, transactions) if type else transactions
-            headers = ["Id", "Date", "Description", "Amount", "Type"]
+            # remove the "Id" column and the "Type" column for unverbose mode
+            filtered_transactions = [row[1:4] for row in filtered_transactions]
+            headers = ["Date", "Description", "Amount"]
+        # print the transactions in a table format
         print(tabulate(filtered_transactions, headers=headers, tablefmt="grid"))
