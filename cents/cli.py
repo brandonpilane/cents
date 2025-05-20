@@ -44,7 +44,7 @@ def add(desc, amount, type):
     
     """
     typecolor = "red" if type == "expense" else "green"
-    trans_id = len(data.read_text().splitlines()) - 1
+    trans_id = len(data.read_text().splitlines())
     with open(data, "a", newline='') as f:
         writer = csv.writer(f)
         writer.writerow([str(trans_id), f"{datetime.now().strftime('%Y-%m-%d')}", desc.capitalize(), amount, type])
