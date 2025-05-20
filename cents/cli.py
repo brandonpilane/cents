@@ -28,7 +28,7 @@ def cli(ctx):
 
 @cli.command()
 @click.argument("desc")
-@click.argument("amount", type=int)
+@click.argument("amount", type=float)
 @click.option("-t", "--type", type=click.Choice(["expense", "income"], case_sensitive=False), default="expense", help="Type of transaction: expense or income")
 def add(desc, amount, type):
     """
