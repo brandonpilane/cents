@@ -100,3 +100,41 @@ def list_transactions(type, verbose):
         # print the transactions in a table format
         colored_headers = color_headers(headers)
         print(tabulate(filtered_transactions, headers=colored_headers, tablefmt="fancy_grid", floatfmt=".2f", numalign="right", stralign="left"))
+
+@cli.command()
+@click.argument("id")
+def delete(id):
+    """
+        Delete a transaction by ID.
+
+        Args:
+            id: ID of the transaction to delete
+
+        Examples:
+            cents delete 1
+    """
+    if not data.exists() or data.stat().st_size == 0:
+        not_found()
+        return
+
+    with open(data, "r") as f:
+        reader = csv.reader(f)
+
+        rows = list(reader)
+
+        header = list(rows)[0]  # Read the header
+        transactions = list(rows)[1:]  # Read the transactions
+        # Check if the transaction ID exists
+        if not any(row[0] == id for row in transactions):
+            click.echo(f"Transaction with id {id} not found.")
+            return
+        # Filter out the transaction to delete
+        filtered = [row for row in transactions if row[0] != id]
+        # Reassign IDs to be sequential again
+        for i, row in enumerate(filtered):
+            row[0] = str(i + 1)
+        # Write everything back, including the header
+        with open(data, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+            writer.writerows(filtered)
