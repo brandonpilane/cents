@@ -7,13 +7,14 @@ from colorama import Fore, Style
 
 data = Path.home() / ".cents.csv" # Path to the CSV file
 
-def not_found():
+def not_found(help=True):
     """
         Function to handle the case when the CSV file is not found.
         It creates a new CSV file with the appropriate headers.
     """
-    click.echo(f"No transactions found. Run \'"+ click.style("cents add", fg="green") + f"\' to add a new transaction.")
-    with open(data, "w") as f:
+    if help:
+        click.echo(f"No transactions found. Run \'"+ click.style("cents add", fg="green") + f"\' to add a new transaction.")
+    with open(data, "w",newline='') as f:
         writer = csv.writer(f)
         writer.writerow(["Id", "Date", "Description", "Amount", "Type"])
 
@@ -22,7 +23,7 @@ def not_found():
 def cli(ctx):
     if ctx.invoked_subcommand is None:
         click.echo(f"Cents, a CLI for managing your finances.")
-        if not data.exists():
+        if not data.exists() or data.stat().st_size == 0:
             not_found()
         click.echo(cli.get_help(ctx))  # Show help message
 
@@ -43,6 +44,9 @@ def add(desc, amount, type):
             cents add "Salary" 2000 -t income
     
     """
+    if not data.exists() or data.stat().st_size == 0:
+        not_found(help=False)
+
     typecolor = "red" if type == "expense" else "green"
     trans_id = len(data.read_text().splitlines())
     with open(data, "a", newline='') as f:
@@ -70,7 +74,7 @@ def list_transactions(type, verbose):
             cents list -t income
             cents list -v
     """
-    if not data.exists():
+    if not data.exists() or data.stat().st_size == 0:
         not_found()
         return
 
