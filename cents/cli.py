@@ -3,6 +3,7 @@ import csv
 from pathlib import Path
 from datetime import datetime
 from tabulate import tabulate
+from colorama import Fore, Style
 
 data = Path.home() / ".cents.csv" # Path to the CSV file
 
@@ -49,6 +50,10 @@ def add(desc, amount, type):
         writer.writerow([str(trans_id), f"{datetime.now().strftime('%Y-%m-%d')}", desc.capitalize(), amount, type])
     click.echo(f"Transaction added: '{desc.capitalize()}' for " + click.style(f"{amount}", fg=typecolor))
     
+
+def color_headers(headers):
+    return [Fore.WHITE + Style.BRIGHT + header + Style.RESET_ALL for header in headers]
+
 @cli.command(name="list")
 @click.option("-t", "--type", type=click.Choice(["expense", "income"], case_sensitive=False), help="Filter output by type: expense or income")
 @click.option("-v", "--verbose", is_flag=True, help="Show detailed output")
@@ -72,13 +77,22 @@ def list_transactions(type, verbose):
     with open(data, "r") as f:
         reader = csv.reader(f)
         transactions = list(reader)[1:] # Skip the header row
+
+        #color the ammounts based on the type
+        for i, row in enumerate(transactions):
+            if row[4] == "expense":
+                transactions[i][3] = click.style(row[3], fg="red")
+            else:
+                transactions[i][3] = click.style(row[3], fg="green")
+
         if verbose:
             filtered_transactions = filter(lambda x: x[4] == type, transactions) if type else transactions
             headers = ["Id", "Date", "Description", "Amount", "Type"]
         else:
             filtered_transactions = filter(lambda x: x[4] == type, transactions) if type else transactions
             # remove the "Id" column and the "Type" column for unverbose mode
-            filtered_transactions = [row[1:4] for row in filtered_transactions]
-            headers = ["Date", "Description", "Amount"]
+            filtered_transactions = [row[:4] for row in filtered_transactions]
+            headers = ["Id", "Date", "Description", "Amount"]
         # print the transactions in a table format
-        print(tabulate(filtered_transactions, headers=headers, tablefmt="grid"))
+        colored_headers = color_headers(headers)
+        print(tabulate(filtered_transactions, headers=colored_headers, tablefmt="fancy_grid", floatfmt=".2f", numalign="right", stralign="left"))
