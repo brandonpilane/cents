@@ -140,3 +140,71 @@ def delete(id):
             writer.writerows(filtered)
             
     click.echo(f"Transaction with id {id} deleted.")
+
+@cli.command()
+@click.argument("id", type=int)
+@click.option("--desc", type=str, help="New description of the transaction")
+@click.option("--amount", type=float, help="New amount of the transaction")
+@click.option("-t", "--type", type=click.Choice(["expense", "income"], case_sensitive=False), help="New type of the transaction")
+def edit(id, desc, amount, type):
+    """
+        Edit a transaction by ID.
+
+        Args:
+            id: ID of the transaction to edit
+            desc: New description of the transaction
+            amount: New amount of the transaction
+            type: New type of the transaction
+
+        Examples:
+            cents edit 1 --desc "New description"
+            cents edit 1 --amount 1000 --type income   
+            cents edit 1 --desc "New description" --amount 1000 --type income
+            cents edit 1 --type income
+    """
+    
+    updates = {}
+    if desc is not None:
+        updates["description"] = desc
+    if amount is not None:
+        updates["amount"] = amount
+    if type is not None:
+        updates["type"] = type.lower()
+    
+    if not updates:
+        click.echo("No fields to update. Use --desc, --amount, or --type.")
+        return
+
+    with open(data, "r") as f:
+        reader = csv.reader(f)
+        rows = list(reader)
+        header = list(rows)[0]  # Read the header
+        transactions = list(rows)[1:] # Skip the header row
+        
+        # Check if the transaction ID exists
+        if not any(row[0] == id for row in transactions):
+            click.echo(f"Transaction with id {id} not found.")
+            return
+        
+        # Find the transaction to edit
+        for i, row in enumerate(transactions):
+            if row[0] == id:
+                break
+        else:
+            click.echo(f"Transaction with id {id} not found.")
+            return
+        
+        # Update the transaction
+        transactions[i][1:] = [updates.get(key, value) for key, value in zip(transactions[i][1:], row[1:])]
+        
+        # Reassign IDs to be sequential again
+        for i, row in enumerate(transactions):
+            row[0] = str(i + 1)
+        
+        # Write everything back, including the header
+        with open(data, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+            writer.writerows(transactions[1:])
+
+    click.echo(f"Transaction with id {id} edited.")
