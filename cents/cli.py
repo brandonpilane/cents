@@ -138,3 +138,5 @@ def delete(id):
             writer = csv.writer(f)
             writer.writerow(header)
             writer.writerows(filtered)
+            
+    click.echo(f"Transaction with id {id} deleted.")
