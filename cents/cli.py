@@ -22,7 +22,7 @@ def not_found(help=True):
 @click.pass_context
 def cli(ctx):
     if ctx.invoked_subcommand is None:
-        click.echo(f"Cents, a CLI for managing your finances.")
+        click.echo(click.style("Cents", fg="magenta", blink=True) + f", a CLI for managing your finances.")
         if not data.exists() or data.stat().st_size == 0:
             not_found()
         click.echo(cli.get_help(ctx))  # Show help message
@@ -126,7 +126,7 @@ def delete(id):
         transactions = list(rows)[1:]  # Read the transactions
         # Check if the transaction ID exists
         if not any(row[0] == id for row in transactions):
-            click.echo(f"Transaction with id {id} not found.")
+            click.echo(f"Transaction with id {id} " +  click.style("not found.", fg="red", italic=True))
             return
         # Filter out the transaction to delete
         filtered = [row for row in transactions if row[0] != id]
